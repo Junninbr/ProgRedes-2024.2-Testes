@@ -1,4 +1,5 @@
 import socket
+import os
 
 entrada = input("Insira a requisição: ")
 host = input("Insira o host e porta: ")
@@ -25,5 +26,18 @@ while True:
 
 tcpSock.close()
 
-resposta_decode = resposta.decode()
-print(resposta_decode)
+content = b"Content-Length:"
+content_local = resposta.find(content)
+print(content_local)
+
+if content_local == 79:
+    with open("teste.png", "wb") as f:
+        resposta
+        
+elif content_local == -1:
+    header, dados, outros = resposta.split(b"\r\n\r\n")
+
+    print(f"cabeçalho: {header}")
+    print(f"dados: {dados}")
+    print(f"outros: {outros}")
+
