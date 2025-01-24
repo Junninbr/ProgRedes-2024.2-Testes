@@ -19,9 +19,9 @@ if len(sys.argv) == 4 and sys.argv[2] == "-o":
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if hostParts[0] == "https":
         sock = wrapSocket(sock, HOST)
-        PORT = 80
-    else:
         PORT = 443
+    else:
+        PORT = 80
 
     sock.connect((HOST, PORT))
 
@@ -43,8 +43,9 @@ if len(sys.argv) == 4 and sys.argv[2] == "-o":
     statusLine = headers[0]
     headers = headers[1:]
 
-    print (statusLine)
-    print (headers)
+    #print (statusLine)
+    #print (headers)
+    #print(body)
 
     toRead = 0
     for header in headers:
@@ -52,11 +53,29 @@ if len(sys.argv) == 4 and sys.argv[2] == "-o":
         if header[0] == b'Content-Length':
             toRead = int(header[1])
 
-    if toRead > 0:
-        while len(body) < toRead:
-            body += sock.recv(4096)
+            if toRead > 0:
+                while len(body) < toRead:
+                    body += sock.recv(4096)
 
-        fd = open (sys.argv[3], 'wb')
-        fd.write(body)
-        fd.close()
+                fd = open (sys.argv[3], 'wb')
+                fd.write(body)
+                fd.close()
+
+    if b'Transfer-Encoding: chunked' in headers:
+        with open(sys.argv[3], 'wb') as fd:
+            while True:
+                print(body)
+                chunkData = body.split(b"\r\n")
+                bytesHex = chunkData[0]
+                toRead = int(bytesHex, 16)  
+                dadosChunk = b""
+                if toRead == 0:
+                    break  
+                else:
+                    
+                    dadosChunk = chunkData[1]
+                    fd.write(dadosChunk)
+                    
+
+            
     sock.close()
